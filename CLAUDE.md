@@ -31,6 +31,8 @@ Tests: `uv run pytest`
 
 Download data: `uv run python -m fin_crypto_futures_momentum.download`
 
-Run sweep: `uv run python -m fin_crypto_futures_momentum.run_sweep`
+Run sweep (grid): `uv run python -m fin_crypto_futures_momentum.run_sweep`
+
+Run pre-registered config: `uv run python -m fin_crypto_futures_momentum.run_prereg`
 
 Full pipeline: `bash run.sh`

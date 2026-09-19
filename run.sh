@@ -12,12 +12,18 @@ uv run python -m fin_crypto_futures_momentum.download
 echo "--- DOWNLOAD DONE $(date) ---"
 
 echo ""
-echo "--- SWEEP ---"
+echo "--- SWEEP (grid) ---"
 uv run python -m fin_crypto_futures_momentum.run_sweep
-EXIT=$?
-echo "--- SWEEP EXIT: $EXIT $(date) ---"
+SWEEP_EXIT=$?
+echo "--- SWEEP EXIT: $SWEEP_EXIT $(date) ---"
+
+echo ""
+echo "--- PREREG (365d top20) ---"
+uv run python -m fin_crypto_futures_momentum.run_prereg
+PREREG_EXIT=$?
+echo "--- PREREG EXIT: $PREREG_EXIT $(date) ---"
 
 echo ""
 echo "=== $(date) === PIPELINE COMPLETE ==="
-echo "EXIT: $EXIT (0=PASS, 1=FAIL, 2=KILL)"
-ls -la results/futures_momentum_*/verdict.md 2>/dev/null || echo "(no verdict files found)"
+echo "SWEEP EXIT: $SWEEP_EXIT  PREREG EXIT: $PREREG_EXIT  (0=PASS, 1=FAIL, 2=KILL)"
+ls -la results/*/verdict.md 2>/dev/null || echo "(no verdict files found)"
