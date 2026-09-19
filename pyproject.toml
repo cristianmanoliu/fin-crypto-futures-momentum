@@ -1,0 +1,29 @@
+[project]
+name = "fin-crypto-futures-momentum"
+version = "0.1.0"
+description = "Cross-sectional momentum on Kraken perpetual futures"
+authors = [
+    { name = "Cristian Manoliu", email = "cristian.manoliu@gmail.com" }
+]
+requires-python = ">=3.12"
+dependencies = [
+    "httpx>=0.28.1",
+    "numpy>=2.4.6",
+    "polars>=1.41.2",
+]
+
+[build-system]
+requires = ["uv_build>=0.11.20,<0.12.0"]
+build-backend = "uv_build"
+
+[dependency-groups]
+dev = [
+    "pytest>=9.0.3",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+markers = [
+    "integration: hits live Kraken API or requires downloaded data; excluded by default",
+]
+addopts = "-m 'not integration'"
