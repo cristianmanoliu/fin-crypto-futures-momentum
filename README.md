@@ -1,71 +1,73 @@
 # fin-crypto-futures-momentum
 
-Cross-sectional momentum on Kraken perpetual futures. The same signal family
-as `fin-crypto-lab`, but on a cheaper venue (5bp/side vs 80bp/side spot) with
-a train/test split that matches instrument availability.
+Cross-sectional momentum on Kraken perpetual futures. This project tests the
+same signal family as `fin-crypto-lab`, but on a futures venue (5bp/side) not
+on spot (80bp/side).
 
-## Origin
+## Source
 
-Research idea #1 from `fin-crypto-lab` (2026-09-19). Spot momentum FAIL
-(test Sharpe 0.20, DSR 0.899). The hypothesis: the signal works but spot
-costs (80bp/side) eat the edge. Futures cost 16x less.
+This project came from research idea #1 in `fin-crypto-lab` (2026-09-19). The
+spot momentum strategy did not pass the battery: test Sharpe 0.20, DSR 0.899. The
+hypothesis is that the signal works but spot costs (80bp/side) remove the edge.
+Futures cost 16x less.
 
 ## What we know
 
-- Kraken perpetual futures (PF_ prefix) launched 2022-03-22.
+- Kraken perpetual futures (PF_ prefix) started on 2022-03-22.
 - The candle endpoint (`futures.kraken.com/api/charts/v1/trade/{symbol}/1d`)
-  returns full history since inception. No auth required.
-- BTC perpetual has ~1642 daily candles. 99 pairs have signal at 90-day
-  lookback; 89 pairs at 180-day.
+  gives the full history from the start date. No auth is necessary.
+- The BTC perpetual has about 1642 daily candles. 99 pairs have a signal at a
+  90-day lookback. 89 pairs have a signal at a 180-day lookback.
 - Cost: 5bp/side taker.
-- The `fin-crypto-lab` spot data pipeline uses `api.kraken.com`. Futures use
-  a separate API at `futures.kraken.com`.
+- The `fin-crypto-lab` spot pipeline uses `api.kraken.com`. Futures use a
+  different API at `futures.kraken.com`.
 
-## Proposed train/test split
+## Train/test divide
 
-The current `fin-crypto-lab` split (2017-2022 / 2022-2026) was designed for
-spot. It leaves the futures train window empty.
+The `fin-crypto-lab` divide (2017-2022 train / 2022-2026 test) was for spot data.
+It keeps the futures train window empty.
 
-Proposed: 2022-07 to 2024-06 train, 2024-07 to 2026-09 test. Short history,
-so overfitting risk is high. The honesty battery matters more here than usual.
+This project uses: 2022-07 to 2024-06 train, 2024-07 to 2026-09 test. The
+history is short, so the overfitting risk is high. The honesty battery is more
+important here than in `fin-crypto-lab`.
 
-## What to do next
+## Plan
 
 ### Phase 0: Data pipeline
 
-1. Implement a new download path in `kraken_client.py` (or a new client) for
+1. Add a download path in `kraken_client.py` for
    `futures.kraken.com/api/charts/v1/trade/{symbol}/1d`.
-2. Download daily OHLCV for all PF_ pairs. Catalog pair count and history
-   depth.
-3. Validate: compare BTC perpetual closes to BTC spot closes. The basis
-   should be small and mean-reverting.
+2. Download daily OHLCV for all PF_ pairs. Record the pair count and history depth.
+3. Compare BTC perpetual daily closes with BTC spot daily closes. The basis
+   must be small and mean-reverting.
 
 ### Phase 1: Signal sweep
 
-4. Run the same lookback grid as `fin-crypto-lab` (90, 180, 365 days) with
-   cross-sectional momentum on futures data.
+4. Operate the same lookback grid as `fin-crypto-lab` (90, 180, 365 days) with
+   cross-sectional momentum on the futures data.
 5. Apply the honesty battery: DSR, PBO, kill conditions. Use 5bp/side cost.
-6. If any config passes, compare to the equivalent spot config. The
-   improvement should come from lower costs, not from a different data window.
+6. If a config passes, compare it to the same spot config. The improvement must
+   come from lower costs, not from a different data window.
 
 ### Phase 2: Execution design (only if Phase 1 passes)
 
 7. Weekly rotation on Kraken perpetual futures.
-8. Funding rate drag model: momentum is a directional strategy, so funding
+8. Add a funding-rate drag model. Momentum is a directional strategy, so funding
    costs apply (unlike delta-neutral carry).
 
 ## Honesty method
 
-Same battery as `fin-crypto-lab`: DSR, PBO, train/test Sharpe comparison,
-kill conditions. Copy `metrics_overfit.py` from `fin-equity-lab` (verbatim).
+This project uses the same battery as `fin-crypto-lab`: DSR, PBO, train/test
+Sharpe, kill conditions. The file `metrics_overfit.py` is a verbatim copy from
+`fin-equity-lab`. Do not change it.
 
 ## Key risk
 
-**Short history.** Only ~4 years of data. The train window is 2 years. With
-6 grid configs and 3 lookbacks, multiple-testing correction is essential.
-A PASS here carries lower conviction than a PASS on 9 years of spot data.
+Only about 4 years of data exist. The train window is 2 years. With 6 grid
+configs and 3 lookbacks, multiple-testing correction is necessary. A PASS here
+has lower conviction than a PASS on 9 years of spot data.
 
-## Reference
+## Paper
 
 Liu, Tsyvinski & Wu 2022: "Common Risk Factors in Cryptocurrency"
 (https://doi.org/10.1093/rfs/hhab066).
